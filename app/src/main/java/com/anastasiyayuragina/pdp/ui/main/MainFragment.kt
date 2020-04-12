@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.Nullable
 import com.anastasiyayuragina.pdp.R
+import org.json.JSONObject
 
 class MainFragment : Fragment() {
 
@@ -52,27 +53,55 @@ class MainFragment : Fragment() {
         map["object"] = mapOf(Pair("a", "b"), Pair("c", "d"))
         map["string"] = "Hello World"
 
-        map.toJson()
+        println(" @@ ${map.toJson()}")
+
+        JSONObject(map).toString()
     }
 }
 
 private fun <K, V> Map<K, V>.toJson(): String {
-    return "{ ${this.map {
-        when(val value = it.value) {
-            is Int -> value.toString(it.key as String)
-            is String -> {}
-            is Map<*, *> -> {}
-            is Collection<*> -> {}
-            is Boolean -> {}
-            is Nullable -> {}
-            else -> {}
+    var i = ""
+    this.forEach {
+        i += when(val value = it.value) {
+            is Int -> value.toString(it.key.toString())
+            is String -> value.toString(it.key.toString())
+            is Map<*, *> -> value.toString(it.key.toString())
+            is Collection<*> -> value.toString(it.key.toString())
+            is Boolean -> value.toString(it.key.toString())
+            is Nullable -> value.toString(it.key.toString())
+            else -> ""
         }
     }
-    }" +
-            "}"
 
+    return "{$i}"
 }
 
 infix fun Int.toString(key: String): String {
-    return "$key: $this"
+    return "\"$key\": $this"
+}
+
+infix fun Map<*, *>.toString(key: String): String {
+    return "\"$key\": ${this.toJson()}"
+}
+
+infix fun Collection<*>.toString(key: String) : String {
+    return "\"$key\": ${this.map { 
+        when(it) {
+            is Map<*, *> -> it.toJson()
+            is Collection<*> -> it.toString() 
+            else -> it
+        }
+    }}"
+}
+
+infix fun Boolean.toString(key: String): String {
+    return "\"$key\": $this"
+}
+
+infix fun Nullable.toString(key: String): String {
+    return "\"$key\": null"
+}
+
+infix fun String.toString(key: String): String {
+    return "\"$key\": \"$this\""
 }
