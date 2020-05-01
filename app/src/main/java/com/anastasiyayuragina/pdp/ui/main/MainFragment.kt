@@ -15,10 +15,14 @@ class MainFragment : Fragment() {
         fun newInstance() = MainFragment()
     }
 
-    private val viewModel: MainViewModel by lazy { ViewModelProviders.of(this).get(MainViewModel::class.java) }
+    private val viewModel: MainViewModel by lazy {
+        ViewModelProviders.of(this).get(MainViewModel::class.java)
+    }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
         return inflater.inflate(R.layout.main_fragment, container, false)
     }
 
@@ -52,57 +56,10 @@ class MainFragment : Fragment() {
         map["object"] = mapOf(Pair("a", "b"), Pair("c", "d"))
         map["string"] = "Hello World"
 
-        println(" @@ ${map.toJson()}")
+        jsonTransformer {
+            println(toJson(map))
 
-        JSONObject(map).toString()
-    }
-}
-
-private fun <K, V> Map<K, V>.toJson(): String {
-    val builder = mutableListOf<String>()
-    this.forEach {
-        builder.add(
-            when(val value = it.value) {
-                is Int -> value.toString(it.key.toString())
-                is String -> value.toString(it.key.toString())
-                is Map<*, *> -> value.toString(it.key.toString())
-                is Collection<*> -> value.toString(it.key.toString())
-                is Boolean -> value.toString(it.key.toString())
-                null -> toNullString(it.key.toString())
-                else -> ""
-            }
-        )
-    }
-
-    return "{${builder.joinToString(",")}}"
-}
-
-infix fun Int.toString(key: String): String {
-    return "\"$key\": $this"
-}
-
-infix fun Map<*, *>.toString(key: String): String {
-    return "\"$key\": ${this.toJson()}"
-}
-
-infix fun Collection<*>.toString(key: String) : String {
-    return "\"$key\": ${this.map { 
-        when(it) {
-            is Map<*, *> -> it.toString()
-            is Collection<*> -> it.toString() 
-            else -> it
         }
-    }}"
+    }
 }
 
-infix fun Boolean.toString(key: String): String {
-    return "\"$key\": $this"
-}
-
-fun toNullString(key: String): String {
-    return "\"$key\": null"
-}
-
-infix fun String.toString(key: String): String {
-    return "\"$key\": \"$this\""
-}
