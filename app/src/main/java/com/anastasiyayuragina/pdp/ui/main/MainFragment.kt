@@ -6,7 +6,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.annotation.Nullable
 import com.anastasiyayuragina.pdp.R
 import org.json.JSONObject
 
@@ -60,20 +59,22 @@ class MainFragment : Fragment() {
 }
 
 private fun <K, V> Map<K, V>.toJson(): String {
-    var i = ""
+    val builder = mutableListOf<String>()
     this.forEach {
-        i += when(val value = it.value) {
-            is Int -> value.toString(it.key.toString())
-            is String -> value.toString(it.key.toString())
-            is Map<*, *> -> value.toString(it.key.toString())
-            is Collection<*> -> value.toString(it.key.toString())
-            is Boolean -> value.toString(it.key.toString())
-            is Nullable -> value.toString(it.key.toString())
-            else -> ""
-        }
+        builder.add(
+            when(val value = it.value) {
+                is Int -> value.toString(it.key.toString())
+                is String -> value.toString(it.key.toString())
+                is Map<*, *> -> value.toString(it.key.toString())
+                is Collection<*> -> value.toString(it.key.toString())
+                is Boolean -> value.toString(it.key.toString())
+                null -> toNullString(it.key.toString())
+                else -> ""
+            }
+        )
     }
 
-    return "{$i}"
+    return "{${builder.joinToString(",")}}"
 }
 
 infix fun Int.toString(key: String): String {
@@ -87,7 +88,7 @@ infix fun Map<*, *>.toString(key: String): String {
 infix fun Collection<*>.toString(key: String) : String {
     return "\"$key\": ${this.map { 
         when(it) {
-            is Map<*, *> -> it.toJson()
+            is Map<*, *> -> it.toString()
             is Collection<*> -> it.toString() 
             else -> it
         }
@@ -98,7 +99,7 @@ infix fun Boolean.toString(key: String): String {
     return "\"$key\": $this"
 }
 
-infix fun Nullable.toString(key: String): String {
+fun toNullString(key: String): String {
     return "\"$key\": null"
 }
 
